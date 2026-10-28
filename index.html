@@ -563,7 +563,7 @@
 <div class="tire-monitor-card">
   <div class="tire-header">
     <div class="tire-title">
-      <span>🛞 Giám sát tình trạng lốp xe: <b id="lbl-car-model" style="color:var(--accent);">Toyota Vios</b></span>
+      <span>🛞 Giám sát loại lốp xe: <b id="lbl-car-model" style="color:var(--accent);">Michelin Primacy 4 (205/55 R16)</b></span>
     </div>
     <span class="tire-status-badge" id="tire-status-badge">Tốt (0% mòn)</span>
   </div>
@@ -571,8 +571,8 @@
     <div class="tire-progress-bar" id="tire-progress-bar"></div>
   </div>
   <div class="tire-meta-row">
-    <div>Hạn mức thay lốp: <b id="lbl-lifespan-km" style="color:var(--text);">50,000 km</b></div>
-    <div>Quãng đường còn lại: <b id="lbl-remain-km" style="color:var(--green);">50,000 km</b></div>
+    <div>Định mức thay lốp: <b id="lbl-lifespan-km" style="color:var(--text);">70,000 km</b></div>
+    <div>Quãng đường còn lại: <b id="lbl-remain-km" style="color:var(--green);">70,000 km</b></div>
     <div>Cảnh báo giả lập: <b style="color:var(--orange);">Đạt 10 vòng quay</b></div>
   </div>
 </div>
@@ -623,56 +623,72 @@
 
 <!-- ══ WHEEL SIZE & TIRE SELECTION SETTING ══ -->
 <div class="setting-box">
-  <label>⚙️ Cấu hình lốp xe & Chu vi bánh xe (mm) — Chuẩn cảm biến Tire-track:</label>
+  <label>⚙️ Chọn loại lốp xe & Chu vi bánh xe (mm) — Quản lý tuổi thọ và định mức thay lót/lốp:</label>
   <div class="setting-grid">
     <div class="setting-field">
-      <span class="field-desc">Dòng xe & Thông số lốp</span>
+      <span class="field-desc">Thương hiệu & Loại lốp xe</span>
       <select id="wheel-preset">
-        <!-- Xe ô tô Toyota -->
-        <optgroup label="Xe Ô tô Toyota">
-          <option value="1895" data-lifespan="50000" data-model="Toyota Vios (185/60 R15)" selected>Toyota Vios — 185/60 R15 (1895 mm | Thay: 50.000 km)</option>
-          <option value="2100" data-lifespan="60000" data-model="Toyota Camry (215/55 R17)">Toyota Camry — 215/55 R17 (2100 mm | Thay: 60.000 km)</option>
-          <option value="2167" data-lifespan="60000" data-model="Toyota Corolla Cross (215/60 R17)">Toyota Corolla Cross — 215/60 R17 (2167 mm | Thay: 60.000 km)</option>
-          <option value="2438" data-lifespan="65000" data-model="Toyota Fortuner / Hilux (265/65 R17)">Toyota Fortuner / Hilux — 265/65 R17 (2438 mm | Thay: 65.000 km)</option>
-          <option value="2060" data-lifespan="55000" data-model="Toyota Innova (205/65 R16)">Toyota Innova — 205/65 R16 (2060 mm | Thay: 55.000 km)</option>
+        <!-- Lốp Michelin -->
+        <optgroup label="Lốp Michelin (Pháp)">
+          <option value="1985" data-lifespan="70000" data-model="Michelin Primacy 4 (205/55 R16)" selected>Michelin Primacy 4 — 205/55 R16 (1985 mm | Thay: 70.000 km - Êm ái)</option>
+          <option value="2073" data-lifespan="50000" data-model="Michelin Pilot Sport 5 (225/45 R18)">Michelin Pilot Sport 5 — 225/45 R18 (2073 mm | Thay: 50.000 km - Thể thao)</option>
+          <option value="1953" data-lifespan="80000" data-model="Michelin Energy XM2+ (185/65 R15)">Michelin Energy XM2+ — 185/65 R15 (1953 mm | Thay: 80.000 km - Siêu bền)</option>
+          <option value="2439" data-lifespan="80000" data-model="Michelin LTX Trail (265/65 R17)">Michelin LTX Trail — 265/65 R17 (2439 mm | Thay: 80.000 km - Địa hình/SUV)</option>
+          <option value="2289" data-lifespan="65000" data-model="Michelin Agilis 3 (215/75 R16)">Michelin Agilis 3 — 215/75 R16 (2289 mm | Thay: 65.000 km - Tải nhẹ/Van)</option>
         </optgroup>
 
-        <!-- Xe ô tô Ford -->
-        <optgroup label="Xe Ô tô Ford">
-          <option value="2438" data-lifespan="65000" data-model="Ford Ranger (265/65 R17)">Ford Ranger Wildtrak — 265/65 R17 (2438 mm | Thay: 65.000 km)</option>
-          <option value="2434" data-lifespan="65000" data-model="Ford Everest (265/60 R18)">Ford Everest — 265/60 R18 (2434 mm | Thay: 65.000 km)</option>
-          <option value="2253" data-lifespan="60000" data-model="Ford Territory (235/50 R19)">Ford Territory — 235/50 R19 (2253 mm | Thay: 60.000 km)</option>
-          <option value="2289" data-lifespan="50000" data-model="Ford Transit (215/75 R16)">Ford Transit — 215/75 R16 (2289 mm | Thay: 50.000 km)</option>
-          <option value="2000" data-lifespan="55000" data-model="Ford EcoSport (205/50 R17)">Ford EcoSport — 205/50 R17 (2000 mm | Thay: 55.000 km)</option>
+        <!-- Lốp Bridgestone -->
+        <optgroup label="Lốp Bridgestone (Nhật Bản)">
+          <option value="2100" data-lifespan="65000" data-model="Bridgestone Turanza T005 (215/55 R17)">Bridgestone Turanza T005 — 215/55 R17 (2100 mm | Thay: 65.000 km - Touring)</option>
+          <option value="1895" data-lifespan="70000" data-model="Bridgestone Ecopia EP300 (185/60 R15)">Bridgestone Ecopia EP300 — 185/60 R15 (1895 mm | Thay: 70.000 km - Tiết kiệm xăng)</option>
+          <option value="2011" data-lifespan="45000" data-model="Bridgestone Potenza RE004 (225/45 R17)">Bridgestone Potenza RE004 — 225/45 R17 (2011 mm | Thay: 45.000 km - Ôm cua thể thao)</option>
+          <option value="2439" data-lifespan="75000" data-model="Bridgestone Dueler A/T 697 (265/65 R17)">Bridgestone Dueler A/T 697 — 265/65 R17 (2439 mm | Thay: 75.000 km - Đa địa hình)</option>
+          <option value="2322" data-lifespan="65000" data-model="Bridgestone Alenza 001 (235/60 R18)">Bridgestone Alenza 001 — 235/60 R18 (2322 mm | Thay: 65.000 km - CUV/SUV)</option>
         </optgroup>
 
-        <!-- Các dòng xe phổ biến khác -->
-        <optgroup label="Các hãng ô tô khác">
-          <option value="2322" data-lifespan="60000" data-model="Honda CR-V (235/60 R18)">Honda CR-V — 235/60 R18 (2322 mm | Thay: 60.000 km)</option>
-          <option value="1916" data-lifespan="50000" data-model="Honda City (185/55 R16)">Honda City — 185/55 R16 (1916 mm | Thay: 50.000 km)</option>
-          <option value="1952" data-lifespan="50000" data-model="Hyundai Accent (185/65 R15)">Hyundai Accent — 185/65 R15 (1952 mm | Thay: 50.000 km)</option>
-          <option value="2328" data-lifespan="60000" data-model="Hyundai SantaFe (235/55 R19)">Hyundai SantaFe — 235/55 R19 (2328 mm | Thay: 60.000 km)</option>
-          <option value="2035" data-lifespan="55000" data-model="Mazda CX-5 (225/65 R17)">Mazda CX-5 — 225/65 R17 (2035 mm | Thay: 55.000 km)</option>
-          <option value="2280" data-lifespan="60000" data-model="VinFast VF8 (245/45 R20)">VinFast VF8 — 245/45 R20 (2280 mm | Thay: 60.000 km)</option>
+        <!-- Lốp Goodyear -->
+        <optgroup label="Lốp Goodyear (Mỹ)">
+          <option value="1985" data-lifespan="60000" data-model="Goodyear Assurance TripleMax 2 (205/55 R16)">Goodyear Assurance TripleMax 2 — 205/55 R16 (1985 mm | Thay: 60.000 km - Bám đường ướt)</option>
+          <option value="2439" data-lifespan="70000" data-model="Goodyear Wrangler AT SilentTrac (265/65 R17)">Goodyear Wrangler AT SilentTrac — 265/65 R17 (2439 mm | Thay: 70.000 km - Bán tải A/T)</option>
+          <option value="2002" data-lifespan="50000" data-model="Goodyear Eagle F1 Asymmetric 5 (225/40 R18)">Goodyear Eagle F1 Asymmetric 5 — 225/40 R18 (2002 mm | Thay: 50.000 km - Sport)</option>
+          <option value="2275" data-lifespan="65000" data-model="Goodyear EfficientGrip SUV (225/65 R17)">Goodyear EfficientGrip SUV — 225/65 R17 (2275 mm | Thay: 65.000 km - Êm ái)</option>
         </optgroup>
 
-        <!-- Xe đạp / Khác -->
-        <optgroup label="Xe Đạp & Khác">
-          <option value="2105" data-lifespan="5000" data-model="Xe đạp Road 700x25C">Xe đạp 700×25C — 2105 mm (Thay: 5.000 km)</option>
-          <option value="2055" data-lifespan="4000" data-model="Xe đạp MTB 26x1.50">Xe đạp MTB 26×1.50 — 2055 mm (Thay: 4.000 km)</option>
-          <option value="custom" data-lifespan="50000" data-model="Tùy chỉnh">Custom (Tự nhập thông số)...</option>
+        <!-- Lốp Continental -->
+        <optgroup label="Lốp Continental (Đức)">
+          <option value="1985" data-lifespan="65000" data-model="Continental UltraContact UC6 (205/55 R16)">Continental UltraContact UC6 — 205/55 R16 (1985 mm | Thay: 65.000 km - Cân bằng)</option>
+          <option value="2073" data-lifespan="50000" data-model="Continental MaxContact MC6 (225/45 R18)">Continental MaxContact MC6 — 225/45 R18 (2073 mm | Thay: 50.000 km - Hiệu năng)</option>
+          <option value="2439" data-lifespan="70000" data-model="Continental CrossContact AX6 (265/65 R17)">Continental CrossContact AX6 — 265/65 R17 (2439 mm | Thay: 70.000 km - SUV All-Terrain)</option>
+          <option value="1953" data-lifespan="60000" data-model="Continental ComfortContact CC7 (185/65 R15)">Continental ComfortContact CC7 — 185/65 R15 (1953 mm | Thay: 60.000 km - Siêu êm ái)</option>
+        </optgroup>
+
+        <!-- Các hãng lốp danh tiếng khác -->
+        <optgroup label="Yokohama / Dunlop / Hankook">
+          <option value="1993" data-lifespan="65000" data-model="Yokohama BluEarth-GT AE51 (195/65 R15)">Yokohama BluEarth-GT AE51 — 195/65 R15 (1993 mm | Thay: 65.000 km)</option>
+          <option value="2439" data-lifespan="75000" data-model="Yokohama Geolandar A/T G015 (265/65 R17)">Yokohama Geolandar A/T G015 — 265/65 R17 (2439 mm | Thay: 75.000 km)</option>
+          <option value="2049" data-lifespan="60000" data-model="Dunlop SP Sport LM705 (205/60 R16)">Dunlop SP Sport LM705 — 205/60 R16 (2049 mm | Thay: 60.000 km)</option>
+          <option value="2439" data-lifespan="70000" data-model="Dunlop Grandtrek AT20 (265/65 R17)">Dunlop Grandtrek AT20 — 265/65 R17 (2439 mm | Thay: 70.000 km)</option>
+          <option value="2100" data-lifespan="60000" data-model="Hankook Ventus Prime 3 (215/55 R17)">Hankook Ventus Prime 3 — 215/55 R17 (2100 mm | Thay: 60.000 km)</option>
+          <option value="2442" data-lifespan="70000" data-model="Hankook Dynapro AT2 (265/70 R16)">Hankook Dynapro AT2 — 265/70 R16 (2442 mm | Thay: 70.000 km)</option>
+        </optgroup>
+
+        <!-- Xe đạp / Tùy chỉnh -->
+        <optgroup label="Lốp Xe Đạp & Tùy chỉnh">
+          <option value="2105" data-lifespan="5000" data-model="Continental Grand Prix 5000 (700×25C)">Lốp Road Continental GP5000 700×25C — 2105 mm (Thay: 5.000 km)</option>
+          <option value="2055" data-lifespan="4000" data-model="Maxxis Crossmark (26×1.50)">Lốp MTB Maxxis Crossmark 26×1.50 — 2055 mm (Thay: 4.000 km)</option>
+          <option value="custom" data-lifespan="60000" data-model="Tùy chỉnh">Custom (Tự nhập thông số lốp)...</option>
         </optgroup>
       </select>
     </div>
 
     <div class="setting-field">
       <span class="field-desc">Chu vi vòng bánh (mm)</span>
-      <input type="number" id="wheel-mm" value="1895" min="100" max="4000" step="1">
+      <input type="number" id="wheel-mm" value="1985" min="100" max="4000" step="1">
     </div>
 
     <div class="setting-field">
-      <span class="field-desc">Hạn mức thay lốp (km)</span>
-      <input type="number" id="tire-lifespan-km" value="50000" min="100" max="200000" step="1000">
+      <span class="field-desc">Định mức thay lốp (km)</span>
+      <input type="number" id="tire-lifespan-km" value="70000" min="100" max="200000" step="1000">
     </div>
   </div>
 </div>
@@ -695,9 +711,9 @@ const ALERT_THRESHOLD_REVS = 10; // Giả lập cảnh báo khi đạt 10 vòng
 // ══════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════
-let wheelCirc_m       = 1.895; // Mặc định: Toyota Vios (1895 mm)
-let tireLifespanKm    = 50000; // Định mức thay lốp (km)
-let selectedCarModel  = "Toyota Vios (185/60 R15)";
+let wheelCirc_m       = 1.985; // Mặc định: Michelin Primacy 4 205/55 R16 (1985 mm)
+let tireLifespanKm    = 70000; // Định mức thay lốp (km)
+let selectedTireModel = "Michelin Primacy 4 (205/55 R16)";
 
 let prevRevs          = null;
 let prevTime1024      = null;
@@ -754,19 +770,19 @@ function updateTireConfig() {
   if (wheelPreset.value !== 'custom') {
     wheelMm.value = opt.value;
     wheelCirc_m = parseInt(opt.value, 10) / 1000;
-    tireLifespanKm = parseInt(opt.dataset.lifespan, 10) || 50000;
+    tireLifespanKm = parseInt(opt.dataset.lifespan, 10) || 60000;
     inputLifespanKm.value = tireLifespanKm;
-    selectedCarModel = opt.dataset.model || opt.text;
+    selectedTireModel = opt.dataset.model || opt.text;
   } else {
     wheelCirc_m = parseInt(wheelMm.value, 10) / 1000;
-    tireLifespanKm = parseInt(inputLifespanKm.value, 10) || 50000;
-    selectedCarModel = "Tùy chỉnh (Custom)";
+    tireLifespanKm = parseInt(inputLifespanKm.value, 10) || 60000;
+    selectedTireModel = "Tùy chỉnh (Custom)";
   }
 
-  lblCarModel.textContent = selectedCarModel;
+  lblCarModel.textContent = selectedTireModel;
   lblLifespanKm.textContent = `${tireLifespanKm.toLocaleString('vi-VN')} km`;
   updateTireHealthUI();
-  log(`⚙️ Đã chọn dòng xe: ${selectedCarModel} | Chu vi: ${wheelMm.value} mm | Tuổi thọ lốp: ${tireLifespanKm.toLocaleString('vi-VN')} km`, 'info');
+  log(`⚙️ Đã chọn loại lốp: ${selectedTireModel} | Chu vi: ${wheelMm.value} mm | Định mức thay: ${tireLifespanKm.toLocaleString('vi-VN')} km`, 'info');
 }
 
 wheelPreset.addEventListener('change', updateTireConfig);
@@ -774,7 +790,8 @@ wheelPreset.addEventListener('change', updateTireConfig);
 wheelMm.addEventListener('input', () => {
   wheelCirc_m = (parseInt(wheelMm.value, 10) || 1000) / 1000;
   wheelPreset.value = 'custom';
-  lblCarModel.textContent = "Tùy chỉnh (Custom)";
+  selectedTireModel = "Tùy chỉnh (Custom)";
+  lblCarModel.textContent = selectedTireModel;
   updateTireHealthUI();
 });
 
@@ -826,10 +843,10 @@ function triggerTireReplacementAlert(revsCount) {
 
   // Hiển thị alert banner trên giao diện
   alertTitle.textContent = `⚠️ CẢNH BÁO THAY LỐP: ĐÃ QUAY ĐỦ ${revsCount} VÒNG!`;
-  alertDesc.textContent = `Hệ thống mô phỏng phát hiện lốp xe [${selectedCarModel}] đã đạt ngưỡng cảnh báo 10 vòng quay (tương đương hết hạn mức ${tireLifespanKm.toLocaleString('vi-VN')} km). Vui lòng thay lót/lốp xe ngay lập tức!`;
+  alertDesc.textContent = `Hệ thống mô phỏng phát hiện lốp xe [${selectedTireModel}] đã đạt ngưỡng cảnh báo 10 vòng quay (tương đương định mức khuyến cáo ${tireLifespanKm.toLocaleString('vi-VN')} km). Vui lòng kiểm tra và thay lót/lốp xe mới ngay!`;
   alertBanner.classList.add('active');
 
-  log(`🚨 [CẢNH BÁO] Đã quay đủ ${revsCount} vòng! Kích hoạt thông báo thay lót/lốp xe.`, 'err');
+  log(`🚨 [CẢNH BÁO] Đã quay đủ ${revsCount} vòng! Kích hoạt thông báo thay lót/lốp xe cho [${selectedTireModel}].`, 'err');
 
   // Phát âm thanh bíp cảnh báo (Web Audio API)
   playAlertBeep();
@@ -839,7 +856,7 @@ function triggerTireReplacementAlert(revsCount) {
     alert(
       `🚨 [TIRE-TRACK CẢNH BÁO THAY LỐP XE]\n\n` +
       `Bánh xe đã quay đủ ${revsCount} vòng (Ngưỡng cảnh báo giả lập 10 vòng)!\n` +
-      `Dòng xe: ${selectedCarModel}\n` +
+      `Loại lốp xe: ${selectedTireModel}\n` +
       `Định mức khuyến cáo thay lốp: ${tireLifespanKm.toLocaleString('vi-VN')} km.\n\n` +
       `⚠️ Lốp xe đã chạm giới hạn an toàn. Vui lòng kiểm tra và tiến hành THAY LỐP/LÓT XE mới ngay!`
     );
