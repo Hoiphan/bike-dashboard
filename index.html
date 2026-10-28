@@ -3,18 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 Speed Sensor Dashboard</title>
+<title>Tire-Track Dashboard • Hệ thống Giám sát & Quản lý Lốp Xe</title>
 <style>
   :root {
-    --bg: #0d0f14;
-    --card: #161b27;
-    --border: #252d40;
+    --bg: #0b0e14;
+    --card: #151a26;
+    --card-hover: #1b2232;
+    --border: #242c3f;
     --accent: #00d4ff;
+    --accent-glow: rgba(0, 212, 255, 0.25);
     --green: #00ff88;
-    --orange: #ff8c00;
-    --red: #ff4444;
-    --text: #e8eaf0;
-    --muted: #6b7280;
+    --green-glow: rgba(0, 255, 136, 0.2);
+    --orange: #ff9800;
+    --red: #ff3b30;
+    --red-glow: rgba(255, 59, 48, 0.3);
+    --text: #f0f3fa;
+    --muted: #7b8599;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,9 +26,11 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     min-height: 100vh;
     padding: 16px;
+    max-width: 900px;
+    margin: 0 auto;
   }
 
   /* ── Header ── */
@@ -32,111 +38,333 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand svg { width: 28px; height: 28px; }
-  .brand h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
-  .brand p { font-size: 0.72rem; color: var(--muted); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,255,136,0.15));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .brand-logo svg { width: 28px; height: 28px; }
+  .brand h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, #00d4ff, #00ff88);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .brand p { font-size: 0.74rem; color: var(--muted); margin-top: 1px; }
 
   /* ── Status dot ── */
+  .conn-status-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
   #status-dot {
     width: 10px; height: 10px; border-radius: 50%;
     background: var(--muted);
     display: inline-block;
-    transition: background 0.3s;
-    box-shadow: 0 0 0 0 transparent;
+    transition: all 0.3s;
   }
   #status-dot.connected {
     background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px var(--green);
+    animation: pulse-dot 2s infinite;
   }
-  #status-dot.connecting { background: var(--orange); }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 8px var(--green); }
-    50%      { box-shadow: 0 0 18px var(--green); }
+  #status-dot.connecting {
+    background: var(--orange);
+    box-shadow: 0 0 8px var(--orange);
   }
-  #status-text { font-size: 0.78rem; color: var(--muted); margin-left: 6px; }
+  @keyframes pulse-dot {
+    0%,100% { box-shadow: 0 0 6px var(--green); }
+    50%      { box-shadow: 0 0 16px var(--green); }
+  }
+  #status-text { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
 
   /* ── Connect button ── */
   #btn-connect {
-    background: var(--accent);
-    color: #000;
+    background: linear-gradient(135deg, #00d4ff, #00b4d8);
+    color: #050a14;
     border: none;
-    border-radius: 8px;
-    padding: 9px 18px;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 0.86rem;
     font-weight: 700;
     cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s ease;
+    display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 4px 14px var(--accent-glow);
   }
-  #btn-connect:hover { opacity: 0.85; transform: scale(1.02); }
-  #btn-connect:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  #btn-connect:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+  }
+  #btn-connect:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
   #btn-connect svg { width: 16px; height: 16px; }
+
+  /* ── ALERT BANNER ── */
+  .alert-banner {
+    display: none;
+    background: linear-gradient(135deg, rgba(255, 59, 48, 0.2), rgba(180, 20, 20, 0.3));
+    border: 2px solid var(--red);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 0 25px var(--red-glow);
+    animation: alert-pulse 1.6s infinite ease-in-out;
+  }
+  .alert-banner.active { display: flex; }
+  @keyframes alert-pulse {
+    0%, 100% { border-color: var(--red); box-shadow: 0 0 15px var(--red-glow); }
+    50% { border-color: #ff9800; box-shadow: 0 0 30px rgba(255, 152, 0, 0.45); }
+  }
+  .alert-left { display: flex; align-items: center; gap: 12px; }
+  .alert-icon {
+    font-size: 1.8rem;
+    animation: shake 1s infinite;
+  }
+  @keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+  }
+  .alert-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #ff6b6b;
+  }
+  .alert-desc {
+    font-size: 0.8rem;
+    color: #e0e0e0;
+    margin-top: 2px;
+  }
+  .btn-dismiss-alert {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .btn-dismiss-alert:hover { opacity: 0.9; }
 
   /* ── Speedometer (SVG gauge) ── */
   .gauge-section {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 18px;
+    padding: 22px 18px 16px;
     margin-bottom: 16px;
     text-align: center;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
   }
   .gauge-title {
-    font-size: 0.75rem;
+    font-size: 0.76rem;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    margin-bottom: 10px;
   }
-  #gauge-svg { width: 220px; height: 130px; }
-  #gauge-arc-fill { stroke-dasharray: 0 220; transition: stroke-dasharray 0.4s ease; }
+  #gauge-svg { width: 260px; height: 145px; }
+  #gauge-arc-fill {
+    stroke-dasharray: 0 220;
+    transition: stroke-dasharray 0.35s ease, stroke 0.4s;
+  }
   #gauge-kmh {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 800;
     fill: var(--text);
     font-family: 'Segoe UI', system-ui;
   }
-  #gauge-unit { font-size: 0.9rem; fill: var(--muted); font-family: inherit; }
+  #gauge-unit { font-size: 0.95rem; fill: var(--muted); font-family: inherit; font-weight: 500; }
+
+  /* ── Simulation Toolbar ── */
+  .sim-toolbar {
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px dashed rgba(0, 212, 255, 0.4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .sim-info {
+    font-size: 0.78rem;
+    color: #9ecae1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sim-actions { display: flex; gap: 8px; }
+  .btn-sim {
+    background: rgba(0, 212, 255, 0.15);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-sim:hover {
+    background: var(--accent);
+    color: #0b0e14;
+  }
+  .btn-sim.alert-trigger {
+    background: rgba(255, 59, 48, 0.15);
+    color: #ff6b6b;
+    border-color: var(--red);
+  }
+  .btn-sim.alert-trigger:hover {
+    background: var(--red);
+    color: #fff;
+  }
 
   /* ── Grid cards ── */
   .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 16px;
+  }
+  @media (min-width: 650px) {
+    .grid { grid-template-columns: repeat(4, 1fr); }
   }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 16px 14px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .card:hover {
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
   }
   .card-label {
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--muted);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    font-weight: 600;
   }
   .card-value {
-    font-size: 2rem;
+    font-size: 1.85rem;
     font-weight: 800;
-    line-height: 1;
+    line-height: 1.1;
     color: var(--text);
   }
   .card-unit {
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: var(--muted);
-    margin-top: 3px;
+    margin-top: 4px;
   }
   .card.accent .card-value { color: var(--accent); }
   .card.green  .card-value { color: var(--green); }
+  .card.orange .card-value { color: var(--orange); }
+  .card.red    .card-value { color: var(--red); }
+
+  /* ── Tire Life Monitor Box ── */
+  .tire-monitor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .tire-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .tire-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+  }
+  .tire-status-badge {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    background: rgba(0, 255, 136, 0.15);
+    color: var(--green);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+  }
+  .tire-status-badge.warning {
+    background: rgba(255, 152, 0, 0.15);
+    color: var(--orange);
+    border-color: rgba(255, 152, 0, 0.3);
+  }
+  .tire-status-badge.danger {
+    background: rgba(255, 59, 48, 0.2);
+    color: var(--red);
+    border-color: var(--red);
+    animation: pulse-dot 1.5s infinite;
+  }
+
+  .tire-progress-wrap {
+    background: rgba(255, 255, 255, 0.05);
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+  }
+  .tire-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    transition: width 0.4s ease, background 0.4s ease;
+  }
+  .tire-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+    gap: 6px;
+  }
 
   /* ── Trip bar ── */
   .trip-bar {
@@ -151,30 +379,9 @@
     gap: 8px;
   }
   .trip-item { text-align: center; flex: 1; }
-  .trip-item .tval { font-size: 1.3rem; font-weight: 700; }
+  .trip-item .tval { font-size: 1.25rem; font-weight: 700; }
   .trip-item .tlbl { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
-  .sep { width: 1px; background: var(--border); height: 36px; }
-
-  /* ── Wheel size setting ── */
-  .setting-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-  }
-  .setting-box label { font-size: 0.78rem; color: var(--muted); display: block; margin-bottom: 8px; }
-  .setting-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .setting-row select, .setting-row input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 7px 10px;
-    font-size: 0.82rem;
-    flex: 1;
-  }
-  .setting-row input[type=number] { width: 90px; flex: none; }
+  .sep { width: 1px; background: var(--border); height: 34px; }
 
   /* ── Reset button ── */
   #btn-reset {
@@ -182,29 +389,81 @@
     color: var(--muted);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 7px 14px;
+    padding: 8px 14px;
     font-size: 0.78rem;
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
+    transition: color 0.2s, border-color 0.2s, transform 0.1s;
+    white-space: nowrap;
   }
-  #btn-reset:hover { color: var(--red); border-color: var(--red); }
+  #btn-reset:hover { color: var(--red); border-color: var(--red); transform: scale(1.02); }
+
+  /* ── Wheel size setting ── */
+  .setting-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .setting-box label {
+    font-size: 0.8rem;
+    color: var(--text);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .setting-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  @media (min-width: 600px) {
+    .setting-grid { grid-template-columns: 2fr 1fr 1fr; }
+  }
+  .setting-field { display: flex; flex-direction: column; gap: 4px; }
+  .field-desc { font-size: 0.68rem; color: var(--muted); }
+  select, input[type=number] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  select:focus, input[type=number]:focus {
+    border-color: var(--accent);
+  }
+  optgroup {
+    background: var(--card);
+    color: var(--accent);
+    font-weight: bold;
+  }
+  option {
+    background: var(--bg);
+    color: var(--text);
+    font-weight: normal;
+  }
 
   /* ── Log ── */
   .log-box {
-    background: #0a0c10;
+    background: #080a0e;
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 12px;
-    max-height: 100px;
+    max-height: 110px;
     overflow-y: auto;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: var(--muted);
-    font-family: monospace;
+    font-family: 'Consolas', 'Monaco', monospace;
   }
   .log-box p { line-height: 1.6; }
   .log-box p.ok { color: var(--green); }
   .log-box p.err { color: var(--red); }
   .log-box p.info { color: var(--accent); }
+  .log-box p.warn { color: var(--orange); }
 </style>
 </head>
 <body>
@@ -212,19 +471,33 @@
 <!-- ══ HEADER ══ -->
 <header>
   <div class="brand">
-    <!-- Bicycle icon -->
-    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/>
-      <path d="M15 6h-3l-3 11.5M8 6h5l3 5H8"/>
-    </svg>
+    <div class="brand-logo">
+      <!-- Tire / Wheel Track SVG icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <defs>
+          <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00d4ff"/>
+            <stop offset="100%" stop-color="#00ff88"/>
+          </linearGradient>
+        </defs>
+        <!-- Tire outer and inner rings -->
+        <circle cx="12" cy="12" r="9"/>
+        <circle cx="12" cy="12" r="4"/>
+        <!-- Spokes / Tire tread pattern -->
+        <path d="M12 3v5M12 16v5M3 12h5M16 12h5M5.6 5.6l3.5 3.5M14.9 14.9l3.5 3.5M5.6 18.4l3.5-3.5M14.9 9.1l3.5-3.5"/>
+      </svg>
+    </div>
     <div>
-      <h1>ESP32 Speed Sensor</h1>
-      <p>Bluetooth CSC Dashboard • chuẩn 0x1816</p>
+      <h1>Tire-Track</h1>
+      <p>Hệ thống Giám sát & Quản lý Tuổi thọ Lốp Xe • Chuẩn CSC 0x1816</p>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <span id="status-dot"></span>
-    <span id="status-text">Chưa kết nối</span>
+
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="conn-status-wrap">
+      <span id="status-dot"></span>
+      <span id="status-text">Chưa kết nối</span>
+    </div>
     <button id="btn-connect">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
         <path d="M8 6h10M6 12h12M8 18h10M3 6l2 2-2 2M3 18l2-2-2-2"/>
@@ -234,9 +507,32 @@
   </div>
 </header>
 
+<!-- ══ ALERT BANNER (KHI ĐẠT 10 VÒNG GIẢ LẬP HOẶC HẾT HẠN LỐP) ══ -->
+<div class="alert-banner" id="alert-banner">
+  <div class="alert-left">
+    <div class="alert-icon">⚠️</div>
+    <div>
+      <div class="alert-title" id="alert-title">CẢNH BÁO: BÁNH XE ĐÃ ĐẠT 10 VÒNG QUAY!</div>
+      <div class="alert-desc" id="alert-desc">Giả lập phát hiện lốp xe đã chạm mức cảnh báo hao mòn. Vui lòng kiểm tra và thay lốp mới để đảm bảo an toàn vận hành.</div>
+    </div>
+  </div>
+  <button class="btn-dismiss-alert" id="btn-dismiss-alert">✓ Đã thay lốp / Đặt lại</button>
+</div>
+
+<!-- ══ SIMULATION TOOLBAR ══ -->
+<div class="sim-toolbar">
+  <div class="sim-info">
+    <span>💡 <b>Chế độ thử nghiệm:</b> Giả lập quay bánh xe để test tính năng cảnh báo khi đạt 10 vòng.</span>
+  </div>
+  <div class="sim-actions">
+    <button class="btn-sim" id="btn-sim-1rev">+1 Vòng quay</button>
+    <button class="btn-sim alert-trigger" id="btn-sim-10rev">⚡ Giả lập 10 Vòng (Alert thay lốp)</button>
+  </div>
+</div>
+
 <!-- ══ SPEEDOMETER ══ -->
 <div class="gauge-section">
-  <div class="gauge-title">Tốc độ tức thời</div>
+  <div class="gauge-title">Đồng hồ tốc độ tức thời</div>
   <svg id="gauge-svg" viewBox="0 0 220 130">
     <!-- Background arc -->
     <path d="M25,115 A90,90 0 0,1 195,115" fill="none" stroke="#252d40" stroke-width="12" stroke-linecap="round"/>
@@ -247,19 +543,38 @@
     <defs>
       <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" stop-color="#00d4ff"/>
-        <stop offset="100%" stop-color="#00ff88"/>
+        <stop offset="50%" stop-color="#00ff88"/>
+        <stop offset="100%" stop-color="#ff3b30"/>
       </linearGradient>
     </defs>
     <!-- Speed text -->
     <text id="gauge-kmh" x="110" y="100" text-anchor="middle">0.0</text>
     <text id="gauge-unit" x="110" y="120" text-anchor="middle">km/h</text>
-    <!-- Scale ticks -->
+    <!-- Scale ticks for Car speeds (0 - 120 km/h) -->
     <text x="20"  y="115" font-size="9" fill="#6b7280" text-anchor="middle">0</text>
-    <text x="52"  y="53"  font-size="9" fill="#6b7280" text-anchor="middle">10</text>
-    <text x="110" y="28"  font-size="9" fill="#6b7280" text-anchor="middle">20</text>
-    <text x="168" y="53"  font-size="9" fill="#6b7280" text-anchor="middle">30</text>
-    <text x="200" y="115" font-size="9" fill="#6b7280" text-anchor="middle">40</text>
+    <text x="50"  y="55"  font-size="9" fill="#6b7280" text-anchor="middle">30</text>
+    <text x="110" y="28"  font-size="9" fill="#6b7280" text-anchor="middle">60</text>
+    <text x="170" y="55"  font-size="9" fill="#6b7280" text-anchor="middle">90</text>
+    <text x="200" y="115" font-size="9" fill="#6b7280" text-anchor="middle">120</text>
   </svg>
+</div>
+
+<!-- ══ TIRE LIFE & MAINTENANCE CARD ══ -->
+<div class="tire-monitor-card">
+  <div class="tire-header">
+    <div class="tire-title">
+      <span>🛞 Giám sát tình trạng lốp xe: <b id="lbl-car-model" style="color:var(--accent);">Toyota Vios</b></span>
+    </div>
+    <span class="tire-status-badge" id="tire-status-badge">Tốt (0% mòn)</span>
+  </div>
+  <div class="tire-progress-wrap">
+    <div class="tire-progress-bar" id="tire-progress-bar"></div>
+  </div>
+  <div class="tire-meta-row">
+    <div>Hạn mức thay lốp: <b id="lbl-lifespan-km" style="color:var(--text);">50,000 km</b></div>
+    <div>Quãng đường còn lại: <b id="lbl-remain-km" style="color:var(--green);">50,000 km</b></div>
+    <div>Cảnh báo giả lập: <b style="color:var(--orange);">Đạt 10 vòng quay</b></div>
+  </div>
 </div>
 
 <!-- ══ MAIN CARDS ══ -->
@@ -269,10 +584,10 @@
     <div class="card-value" id="val-distance">0.000</div>
     <div class="card-unit">kilomet (km)</div>
   </div>
-  <div class="card green">
-    <div class="card-label">🔄 Vòng quay</div>
+  <div class="card green" id="card-revs">
+    <div class="card-label">🔄 Vòng quay tích lũy</div>
     <div class="card-value" id="val-revs">0</div>
-    <div class="card-unit">số vòng tích lũy</div>
+    <div class="card-unit" id="lbl-revs-hint">ngưỡng test: 10 vòng</div>
   </div>
   <div class="card">
     <div class="card-label">⚡ RPM</div>
@@ -282,7 +597,7 @@
   <div class="card">
     <div class="card-label">🏁 Vòng/giây</div>
     <div class="card-value" id="val-rps">0.0</div>
-    <div class="card-unit">rev / giây (Hz)</div>
+    <div class="card-unit">tần số (Hz)</div>
   </div>
 </div>
 
@@ -300,104 +615,329 @@
   <div class="sep"></div>
   <div class="trip-item">
     <div class="tval" id="val-time">00:00</div>
-    <div class="tlbl">⏱ Thời gian</div>
+    <div class="tlbl">⏱ Thời gian chạy</div>
   </div>
   <div class="sep"></div>
-  <button id="btn-reset">↺ Reset</button>
+  <button id="btn-reset">↺ Reset chuyến đi</button>
 </div>
 
-<!-- ══ WHEEL SIZE SETTING ══ -->
+<!-- ══ WHEEL SIZE & TIRE SELECTION SETTING ══ -->
 <div class="setting-box">
-  <label>⚙️ Chu vi bánh xe (mm) — Wahoo / App cũng cần cài đặt mục này:</label>
-  <div class="setting-row">
-    <select id="wheel-preset">
-      <option value="2105">700×25C — 2105 mm (Xe đua / Road bike)</option>
-      <option value="2096">700×23C — 2096 mm</option>
-      <option value="2133">700×28C — 2133 mm</option>
-      <option value="2070">700×20C — 2070 mm</option>
-      <option value="2055">26×1.50 — 2055 mm (MTB)</option>
-      <option value="1913">24×1.75 — 1913 mm</option>
-      <option value="1590">20×1.75 — 1590 mm</option>
-      <option value="custom">Custom (Tự nhập)...</option>
-    </select>
-    <input type="number" id="wheel-mm" value="2105" min="100" max="3000" step="1"> mm
+  <label>⚙️ Cấu hình lốp xe & Chu vi bánh xe (mm) — Chuẩn cảm biến Tire-track:</label>
+  <div class="setting-grid">
+    <div class="setting-field">
+      <span class="field-desc">Dòng xe & Thông số lốp</span>
+      <select id="wheel-preset">
+        <!-- Xe ô tô Toyota -->
+        <optgroup label="Xe Ô tô Toyota">
+          <option value="1895" data-lifespan="50000" data-model="Toyota Vios (185/60 R15)" selected>Toyota Vios — 185/60 R15 (1895 mm | Thay: 50.000 km)</option>
+          <option value="2100" data-lifespan="60000" data-model="Toyota Camry (215/55 R17)">Toyota Camry — 215/55 R17 (2100 mm | Thay: 60.000 km)</option>
+          <option value="2167" data-lifespan="60000" data-model="Toyota Corolla Cross (215/60 R17)">Toyota Corolla Cross — 215/60 R17 (2167 mm | Thay: 60.000 km)</option>
+          <option value="2438" data-lifespan="65000" data-model="Toyota Fortuner / Hilux (265/65 R17)">Toyota Fortuner / Hilux — 265/65 R17 (2438 mm | Thay: 65.000 km)</option>
+          <option value="2060" data-lifespan="55000" data-model="Toyota Innova (205/65 R16)">Toyota Innova — 205/65 R16 (2060 mm | Thay: 55.000 km)</option>
+        </optgroup>
+
+        <!-- Xe ô tô Ford -->
+        <optgroup label="Xe Ô tô Ford">
+          <option value="2438" data-lifespan="65000" data-model="Ford Ranger (265/65 R17)">Ford Ranger Wildtrak — 265/65 R17 (2438 mm | Thay: 65.000 km)</option>
+          <option value="2434" data-lifespan="65000" data-model="Ford Everest (265/60 R18)">Ford Everest — 265/60 R18 (2434 mm | Thay: 65.000 km)</option>
+          <option value="2253" data-lifespan="60000" data-model="Ford Territory (235/50 R19)">Ford Territory — 235/50 R19 (2253 mm | Thay: 60.000 km)</option>
+          <option value="2289" data-lifespan="50000" data-model="Ford Transit (215/75 R16)">Ford Transit — 215/75 R16 (2289 mm | Thay: 50.000 km)</option>
+          <option value="2000" data-lifespan="55000" data-model="Ford EcoSport (205/50 R17)">Ford EcoSport — 205/50 R17 (2000 mm | Thay: 55.000 km)</option>
+        </optgroup>
+
+        <!-- Các dòng xe phổ biến khác -->
+        <optgroup label="Các hãng ô tô khác">
+          <option value="2322" data-lifespan="60000" data-model="Honda CR-V (235/60 R18)">Honda CR-V — 235/60 R18 (2322 mm | Thay: 60.000 km)</option>
+          <option value="1916" data-lifespan="50000" data-model="Honda City (185/55 R16)">Honda City — 185/55 R16 (1916 mm | Thay: 50.000 km)</option>
+          <option value="1952" data-lifespan="50000" data-model="Hyundai Accent (185/65 R15)">Hyundai Accent — 185/65 R15 (1952 mm | Thay: 50.000 km)</option>
+          <option value="2328" data-lifespan="60000" data-model="Hyundai SantaFe (235/55 R19)">Hyundai SantaFe — 235/55 R19 (2328 mm | Thay: 60.000 km)</option>
+          <option value="2035" data-lifespan="55000" data-model="Mazda CX-5 (225/65 R17)">Mazda CX-5 — 225/65 R17 (2035 mm | Thay: 55.000 km)</option>
+          <option value="2280" data-lifespan="60000" data-model="VinFast VF8 (245/45 R20)">VinFast VF8 — 245/45 R20 (2280 mm | Thay: 60.000 km)</option>
+        </optgroup>
+
+        <!-- Xe đạp / Khác -->
+        <optgroup label="Xe Đạp & Khác">
+          <option value="2105" data-lifespan="5000" data-model="Xe đạp Road 700x25C">Xe đạp 700×25C — 2105 mm (Thay: 5.000 km)</option>
+          <option value="2055" data-lifespan="4000" data-model="Xe đạp MTB 26x1.50">Xe đạp MTB 26×1.50 — 2055 mm (Thay: 4.000 km)</option>
+          <option value="custom" data-lifespan="50000" data-model="Tùy chỉnh">Custom (Tự nhập thông số)...</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="setting-field">
+      <span class="field-desc">Chu vi vòng bánh (mm)</span>
+      <input type="number" id="wheel-mm" value="1895" min="100" max="4000" step="1">
+    </div>
+
+    <div class="setting-field">
+      <span class="field-desc">Hạn mức thay lốp (km)</span>
+      <input type="number" id="tire-lifespan-km" value="50000" min="100" max="200000" step="1000">
+    </div>
   </div>
 </div>
 
-<!-- ══ LOG ══ -->
+<!-- ══ SYSTEM LOG ══ -->
 <div class="log-box" id="log-box">
-  <p class="info">⬆ Bấm nút "Kết nối Bluetooth" để bắt đầu. Yêu cầu Google Chrome.</p>
+  <p class="info">⬆ Hệ thống Tire-Track đã sẵn sàng. Kết nối cảm biến Bluetooth CSC hoặc bấm "Giả lập" để thử nghiệm.</p>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════════
 // CONSTANTS
 // ══════════════════════════════════════════════════════
-const CSC_SERVICE    = 0x1816;
-const CSC_MEASURE    = 0x2A5B;
-const MAX_SPEED_KMH  = 40; // Giới hạn hiển thị đồng hồ tốc độ
-const GAUGE_PATH_LEN = 220;
+const CSC_SERVICE       = 0x1816;
+const CSC_MEASURE       = 0x2A5B;
+const MAX_SPEED_KMH     = 120; // Thang đo tối đa cho ô tô (120 km/h)
+const GAUGE_PATH_LEN    = 220;
+const ALERT_THRESHOLD_REVS = 10; // Giả lập cảnh báo khi đạt 10 vòng
 
 // ══════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════
-let wheelCirc_m = 2.105; // Chu vi bánh xe (mét), mặc định 700×25C
-let prevRevs  = null, prevTime1024 = null;
-let maxSpeed  = 0, totalSpeedSamples = 0, sumSpeed = 0;
-let startTime = null, timerInterval = null;
-let device = null;
+let wheelCirc_m       = 1.895; // Mặc định: Toyota Vios (1895 mm)
+let tireLifespanKm    = 50000; // Định mức thay lốp (km)
+let selectedCarModel  = "Toyota Vios (185/60 R15)";
+
+let prevRevs          = null;
+let prevTime1024      = null;
+let currentRevs       = 0;
+let maxSpeed          = 0;
+let totalSpeedSamples = 0;
+let sumSpeed          = 0;
+let startTime         = null;
+let timerInterval     = null;
+let device            = null;
+let alerted10Revs     = false; // Cờ kiểm tra đã alert 10 vòng chưa
 
 // ══════════════════════════════════════════════════════
 // DOM REFS
 // ══════════════════════════════════════════════════════
-const btnConnect  = document.getElementById('btn-connect');
-const btnReset    = document.getElementById('btn-reset');
-const statusDot   = document.getElementById('status-dot');
-const statusText  = document.getElementById('status-text');
-const logBox      = document.getElementById('log-box');
-const arcFill     = document.getElementById('gauge-arc-fill');
-const gaugeKmh    = document.getElementById('gauge-kmh');
-const valDist     = document.getElementById('val-distance');
-const valRevs     = document.getElementById('val-revs');
-const valRpm      = document.getElementById('val-rpm');
-const valRps      = document.getElementById('val-rps');
-const valMaxspeed = document.getElementById('val-maxspeed');
-const valAvgspeed = document.getElementById('val-avgspeed');
-const valTime     = document.getElementById('val-time');
-const wheelPreset = document.getElementById('wheel-preset');
-const wheelMm     = document.getElementById('wheel-mm');
+const btnConnect       = document.getElementById('btn-connect');
+const btnReset         = document.getElementById('btn-reset');
+const statusDot        = document.getElementById('status-dot');
+const statusText       = document.getElementById('status-text');
+const logBox           = document.getElementById('log-box');
+const arcFill          = document.getElementById('gauge-arc-fill');
+const gaugeKmh         = document.getElementById('gauge-kmh');
+
+const valDist          = document.getElementById('val-distance');
+const valRevs          = document.getElementById('val-revs');
+const valRpm           = document.getElementById('val-rpm');
+const valRps           = document.getElementById('val-rps');
+const valMaxspeed      = document.getElementById('val-maxspeed');
+const valAvgspeed      = document.getElementById('val-avgspeed');
+const valTime          = document.getElementById('val-time');
+const cardRevs         = document.getElementById('card-revs');
+
+const wheelPreset      = document.getElementById('wheel-preset');
+const wheelMm          = document.getElementById('wheel-mm');
+const inputLifespanKm  = document.getElementById('tire-lifespan-km');
+const lblCarModel      = document.getElementById('lbl-car-model');
+const lblLifespanKm    = document.getElementById('lbl-lifespan-km');
+const lblRemainKm      = document.getElementById('lbl-remain-km');
+const tireProgressBar  = document.getElementById('tire-progress-bar');
+const tireStatusBadge  = document.getElementById('tire-status-badge');
+
+const alertBanner      = document.getElementById('alert-banner');
+const alertTitle       = document.getElementById('alert-title');
+const alertDesc        = document.getElementById('alert-desc');
+const btnDismissAlert  = document.getElementById('btn-dismiss-alert');
+const btnSim1Rev       = document.getElementById('btn-sim-1rev');
+const btnSim10Rev      = document.getElementById('btn-sim-10rev');
 
 // ══════════════════════════════════════════════════════
-// WHEEL SIZE
+// WHEEL & TIRE SELECTION LOGIC
 // ══════════════════════════════════════════════════════
-wheelPreset.addEventListener('change', () => {
-  if (wheelPreset.value === 'custom') return;
-  wheelMm.value = wheelPreset.value;
-  wheelCirc_m = parseInt(wheelPreset.value) / 1000;
-  log(`Chu vi bánh xe: ${wheelPreset.value} mm`, 'info');
-});
+function updateTireConfig() {
+  const opt = wheelPreset.options[wheelPreset.selectedIndex];
+  if (wheelPreset.value !== 'custom') {
+    wheelMm.value = opt.value;
+    wheelCirc_m = parseInt(opt.value, 10) / 1000;
+    tireLifespanKm = parseInt(opt.dataset.lifespan, 10) || 50000;
+    inputLifespanKm.value = tireLifespanKm;
+    selectedCarModel = opt.dataset.model || opt.text;
+  } else {
+    wheelCirc_m = parseInt(wheelMm.value, 10) / 1000;
+    tireLifespanKm = parseInt(inputLifespanKm.value, 10) || 50000;
+    selectedCarModel = "Tùy chỉnh (Custom)";
+  }
+
+  lblCarModel.textContent = selectedCarModel;
+  lblLifespanKm.textContent = `${tireLifespanKm.toLocaleString('vi-VN')} km`;
+  updateTireHealthUI();
+  log(`⚙️ Đã chọn dòng xe: ${selectedCarModel} | Chu vi: ${wheelMm.value} mm | Tuổi thọ lốp: ${tireLifespanKm.toLocaleString('vi-VN')} km`, 'info');
+}
+
+wheelPreset.addEventListener('change', updateTireConfig);
+
 wheelMm.addEventListener('input', () => {
-  wheelCirc_m = parseInt(wheelMm.value) / 1000;
+  wheelCirc_m = (parseInt(wheelMm.value, 10) || 1000) / 1000;
   wheelPreset.value = 'custom';
+  lblCarModel.textContent = "Tùy chỉnh (Custom)";
+  updateTireHealthUI();
+});
+
+inputLifespanKm.addEventListener('input', () => {
+  tireLifespanKm = parseInt(inputLifespanKm.value, 10) || 10000;
+  lblLifespanKm.textContent = `${tireLifespanKm.toLocaleString('vi-VN')} km`;
+  updateTireHealthUI();
 });
 
 // ══════════════════════════════════════════════════════
-// CONNECT BUTTON
+// TIRE HEALTH MONITORING & ALERT LOGIC
+// ══════════════════════════════════════════════════════
+function updateTireHealthUI() {
+  const distKm = (currentRevs * wheelCirc_m) / 1000;
+  const remainKm = Math.max(0, tireLifespanKm - distKm);
+  lblRemainKm.textContent = `${remainKm.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} km`;
+
+  // Tính % mòn lốp thực tế hoặc mô phỏng theo 10 vòng
+  const realWearPct = (distKm / tireLifespanKm) * 100;
+  
+  // Với chế độ demo 10 vòng quay:
+  const simWearPct = Math.min(100, (currentRevs / ALERT_THRESHOLD_REVS) * 100);
+  
+  // Hiển thị thanh tiến trình theo tiến độ quay (để test visual dễ quan sát)
+  tireProgressBar.style.width = `${Math.min(100, Math.max(realWearPct, simWearPct))}%`;
+
+  if (currentRevs >= ALERT_THRESHOLD_REVS || distKm >= tireLifespanKm) {
+    tireProgressBar.style.background = 'linear-gradient(90deg, #ff9800, #ff3b30)';
+    tireStatusBadge.className = 'tire-status-badge danger';
+    tireStatusBadge.textContent = '⚠️ CẦN THAY LỐP NGAY!';
+    cardRevs.className = 'card red';
+  } else if (currentRevs >= 6 || realWearPct >= 70) {
+    tireProgressBar.style.background = 'linear-gradient(90deg, #ffc107, #ff9800)';
+    tireStatusBadge.className = 'tire-status-badge warning';
+    tireStatusBadge.textContent = 'Chú ý: Sắp mòn lốp';
+    cardRevs.className = 'card orange';
+  } else {
+    tireProgressBar.style.background = 'linear-gradient(90deg, #00d4ff, #00ff88)';
+    tireStatusBadge.className = 'tire-status-badge';
+    tireStatusBadge.textContent = `Tốt (${Math.round(simWearPct)}% mốc test)`;
+    cardRevs.className = 'card green';
+  }
+}
+
+// Kích hoạt cảnh báo thay lốp (Alert Modal & Browser Alert)
+function triggerTireReplacementAlert(revsCount) {
+  if (alerted10Revs) return; // Chỉ alert 1 lần cho tới khi được reset
+  alerted10Revs = true;
+
+  // Hiển thị alert banner trên giao diện
+  alertTitle.textContent = `⚠️ CẢNH BÁO THAY LỐP: ĐÃ QUAY ĐỦ ${revsCount} VÒNG!`;
+  alertDesc.textContent = `Hệ thống mô phỏng phát hiện lốp xe [${selectedCarModel}] đã đạt ngưỡng cảnh báo 10 vòng quay (tương đương hết hạn mức ${tireLifespanKm.toLocaleString('vi-VN')} km). Vui lòng thay lót/lốp xe ngay lập tức!`;
+  alertBanner.classList.add('active');
+
+  log(`🚨 [CẢNH BÁO] Đã quay đủ ${revsCount} vòng! Kích hoạt thông báo thay lót/lốp xe.`, 'err');
+
+  // Phát âm thanh bíp cảnh báo (Web Audio API)
+  playAlertBeep();
+
+  // Kích hoạt window.alert sau một thoáng để UI kịp render
+  setTimeout(() => {
+    alert(
+      `🚨 [TIRE-TRACK CẢNH BÁO THAY LỐP XE]\n\n` +
+      `Bánh xe đã quay đủ ${revsCount} vòng (Ngưỡng cảnh báo giả lập 10 vòng)!\n` +
+      `Dòng xe: ${selectedCarModel}\n` +
+      `Định mức khuyến cáo thay lốp: ${tireLifespanKm.toLocaleString('vi-VN')} km.\n\n` +
+      `⚠️ Lốp xe đã chạm giới hạn an toàn. Vui lòng kiểm tra và tiến hành THAY LỐP/LÓT XE mới ngay!`
+    );
+  }, 100);
+}
+
+// Tắt banner cảnh báo hoặc reset sau khi thay lốp
+btnDismissAlert.addEventListener('click', () => {
+  alertBanner.classList.remove('active');
+  alerted10Revs = false;
+  log('✅ Đã xác nhận thay lốp mới / Đặt lại trạng thái cảnh báo.', 'ok');
+  updateTireHealthUI();
+});
+
+// Phát âm thanh cảnh báo ngắn gọn
+function playAlertBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(880, ctx.currentTime); // 880 Hz
+    osc.frequency.setValueAtTime(440, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch(e) {
+    // Không làm gián đoạn nếu trình duyệt chặn audio
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// GIẢ LẬP / SIMULATION CONTROLS
+// ══════════════════════════════════════════════════════
+btnSim1Rev.addEventListener('click', () => {
+  simulateRotation(1, 35); // 1 vòng quay với tốc độ giả định 35 km/h
+});
+
+btnSim10Rev.addEventListener('click', () => {
+  // Giả lập trực tiếp đạt mốc 10 vòng quay
+  const revsToAdd = Math.max(1, ALERT_THRESHOLD_REVS - currentRevs);
+  simulateRotation(revsToAdd, 65); // Tốc độ giả định 65 km/h
+});
+
+function simulateRotation(deltaRevs, simulatedSpeedKmh) {
+  currentRevs += deltaRevs;
+  const distKm = (currentRevs * wheelCirc_m) / 1000;
+  const rpm = Math.round((simulatedSpeedKmh / (wheelCirc_m * 3.6)) * 60);
+  const rps = (rpm / 60).toFixed(1);
+
+  if (simulatedSpeedKmh > maxSpeed) maxSpeed = simulatedSpeedKmh;
+  sumSpeed += simulatedSpeedKmh;
+  totalSpeedSamples++;
+
+  // Cập nhật UI
+  updateGauge(simulatedSpeedKmh);
+  valDist.textContent     = distKm.toFixed(3);
+  valRevs.textContent     = currentRevs;
+  valRpm.textContent      = rpm;
+  valRps.textContent      = rps;
+  valMaxspeed.textContent = maxSpeed.toFixed(1);
+  valAvgspeed.textContent = (sumSpeed / totalSpeedSamples).toFixed(1);
+
+  if (!startTime) {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+  }
+
+  updateTireHealthUI();
+  log(`[Giả lập] Quay thêm +${deltaRevs} vòng (Tổng: ${currentRevs} vòng) | Vận tốc: ${simulatedSpeedKmh} km/h`, 'warn');
+
+  // Kiểm tra ngưỡng 10 vòng quay để cảnh báo thay lốp
+  if (currentRevs >= ALERT_THRESHOLD_REVS && !alerted10Revs) {
+    triggerTireReplacementAlert(currentRevs);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// CONNECT BUTTON & BLE CSC SERVICE (0x1816)
 // ══════════════════════════════════════════════════════
 btnConnect.addEventListener('click', async () => {
   if (!navigator.bluetooth) {
-    log('Trình duyệt không hỗ trợ Web Bluetooth! Hãy dùng Google Chrome.', 'err');
+    log('Trình duyệt không hỗ trợ Web Bluetooth! Hãy sử dụng Google Chrome trên máy tính hoặc Android.', 'err');
+    alert('Trình duyệt hiện tại không hỗ trợ Web Bluetooth API. Vui lòng mở trang này trên Google Chrome!');
     return;
   }
   setStatus('connecting');
   btnConnect.disabled = true;
-  log('Đang quét thiết bị Bluetooth...', 'info');
+  log('Đang quét cảm biến Bluetooth CSC 0x1816...', 'info');
 
   try {
     device = await navigator.bluetooth.requestDevice({
       filters: [{ services: [CSC_SERVICE] }]
     });
-    log(`Tìm thấy: ${device.name}`, 'ok');
+    log(`Tìm thấy thiết bị: ${device.name || 'Cảm biến Tire-Track'}`, 'ok');
 
     const server = await device.gatt.connect();
     log('Đã kết nối GATT server...', 'info');
@@ -409,17 +949,16 @@ btnConnect.addEventListener('click', async () => {
     chr.addEventListener('characteristicvaluechanged', onData);
 
     setStatus('connected');
-    log(`✅ Đã kết nối thành công với ${device.name}!`, 'ok');
+    log(`✅ Kết nối thành công với ${device.name || 'Thiết bị cảm biến'}!`, 'ok');
 
-    // Theo dõi nếu thiết bị bị ngắt kết nối
     device.addEventListener('gattserverdisconnected', () => {
       setStatus('disconnected');
-      log('⚠️ Bluetooth bị ngắt kết nối!', 'err');
+      log('⚠️ Bluetooth đã bị ngắt kết nối!', 'err');
     });
 
   } catch (err) {
     setStatus('disconnected');
-    log(`Lỗi: ${err.message}`, 'err');
+    log(`Lỗi kết nối Bluetooth: ${err.message}`, 'err');
     btnConnect.disabled = false;
   }
 });
@@ -439,23 +978,24 @@ function onData(event) {
   // Byte 5–6: Last Wheel Event Time (uint16, little-endian, 1/1024s)
   const eventTime = data.getUint16(5, true);
 
+  currentRevs = cumulRevs;
+
   // Tính delta số vòng và delta thời gian
   let speedKmh = 0, rpm = 0, rps = 0;
 
   if (prevRevs !== null && prevTime1024 !== null) {
-    const deltaRevs = cumulRevs - prevRevs;
-    let   deltaTime = eventTime - prevTime1024;
+    let deltaRevs = cumulRevs - prevRevs;
+    let deltaTime = eventTime - prevTime1024;
 
     // Xử lý tràn số uint16 (65535 -> 0)
     if (deltaTime < 0) deltaTime += 65536;
 
-    if (deltaTime > 0) {
+    if (deltaTime > 0 && deltaRevs >= 0) {
       const deltaTimeSec = deltaTime / 1024.0;
       rps      = deltaRevs / deltaTimeSec;
       rpm      = rps * 60;
       speedKmh = rps * wheelCirc_m * 3.6;
 
-      // Cập nhật thống kê
       if (speedKmh > maxSpeed) maxSpeed = speedKmh;
       if (speedKmh > 0) {
         sumSpeed += speedKmh;
@@ -467,7 +1007,7 @@ function onData(event) {
   prevRevs     = cumulRevs;
   prevTime1024 = eventTime;
 
-  // Tính quãng đường
+  // Tính quãng đường thực tế
   const distKm = (cumulRevs * wheelCirc_m) / 1000;
 
   // Cập nhật UI
@@ -485,21 +1025,28 @@ function onData(event) {
     startTime = Date.now();
     timerInterval = setInterval(updateTimer, 1000);
   }
+
+  // Cập nhật tình trạng lốp xe
+  updateTireHealthUI();
+
+  // Kiểm tra cảnh báo thay lốp khi xe đạt 10 vòng
+  if (cumulRevs >= ALERT_THRESHOLD_REVS && !alerted10Revs) {
+    triggerTireReplacementAlert(cumulRevs);
+  }
 }
 
 // ══════════════════════════════════════════════════════
-// GAUGE ANIMATION
+// GAUGE ANIMATION (Thang đo 0 - 120 km/h)
 // ══════════════════════════════════════════════════════
 function updateGauge(speedKmh) {
-  const clamped   = Math.min(speedKmh, MAX_SPEED_KMH);
-  const fillLen   = (clamped / MAX_SPEED_KMH) * GAUGE_PATH_LEN;
+  const clamped = Math.min(Math.max(0, speedKmh), MAX_SPEED_KMH);
+  const fillLen = (clamped / MAX_SPEED_KMH) * GAUGE_PATH_LEN;
   arcFill.setAttribute('stroke-dasharray', `${fillLen} ${GAUGE_PATH_LEN}`);
 
-  // Màu đổi theo tốc độ
   const pct = clamped / MAX_SPEED_KMH;
   arcFill.style.stroke = pct < 0.5
     ? '#00d4ff'
-    : pct < 0.8 ? '#00ff88' : '#ff8c00';
+    : pct < 0.8 ? '#00ff88' : '#ff3b30';
 
   gaugeKmh.textContent = speedKmh.toFixed(1);
 }
@@ -516,17 +1063,30 @@ function updateTimer() {
 }
 
 // ══════════════════════════════════════════════════════
-// RESET TRIP
+// RESET TRIP & TIRE MONITOR
 // ══════════════════════════════════════════════════════
 btnReset.addEventListener('click', () => {
   prevRevs = prevTime1024 = null;
+  currentRevs = 0;
   maxSpeed = sumSpeed = totalSpeedSamples = 0;
   startTime = null;
   clearInterval(timerInterval);
+  timerInterval = null;
+
+  alerted10Revs = false;
+  alertBanner.classList.remove('active');
+
+  valDist.textContent     = '0.000';
+  valRevs.textContent     = '0';
+  valRpm.textContent      = '0';
+  valRps.textContent      = '0.0';
   valMaxspeed.textContent = '0.0';
   valAvgspeed.textContent = '0.0';
   valTime.textContent     = '00:00';
-  log('↺ Đã reset số liệu chuyến đi.', 'info');
+  updateGauge(0);
+  updateTireHealthUI();
+
+  log('↺ Đã reset lại toàn bộ số liệu chuyến đi và số vòng bánh xe.', 'info');
 });
 
 // ══════════════════════════════════════════════════════
@@ -543,13 +1103,15 @@ function setStatus(state) {
 
 function log(msg, cls = '') {
   const p  = document.createElement('p');
-  const ts = new Date().toLocaleTimeString('vi');
+  const ts = new Date().toLocaleTimeString('vi-VN');
   p.textContent = `[${ts}] ${msg}`;
   if (cls) p.className = cls;
   logBox.appendChild(p);
   logBox.scrollTop = logBox.scrollHeight;
 }
+
+// Khởi tạo mặc định ban đầu
+updateTireConfig();
 </script>
 </body>
 </html>
-
